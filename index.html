@@ -231,6 +231,7 @@
             border-radius: 6px;
         }
         
+        /* MODAL STYLES */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -325,19 +326,19 @@
         .modal-table {
             width: 100%;
             font-size: 0.875rem;
-            border-collapse: separate;
-            border-spacing: 0 0.25rem;
+            border-collapse: collapse;
             text-align: center;
         }
         .modal-table thead th {
             color: #3f3f46;
             font-weight: 600;
-            padding: 0.5rem;
+            padding: 12px 8px;
             border-bottom: 1px solid #e4e4e7;
         }
-        .modal-table td {
-            padding: 0.75rem 0.5rem;
+        .modal-table tbody td {
+            padding: 10px 8px;
             color: #71717a;
+            border-bottom: 1px solid #f1f5f9;
         }
         .pos-name {
             font-weight: 500;
@@ -511,10 +512,8 @@
 </div>
 
 <script>
-    // Armazena enderecos inativados
     let inactiveAddresses = new Set();
     
-    // Dados das ruas (dinamicos para permitir adicionar colunas)
     let warehouseData = {
         "RUA 01": {
             cols: ["M0001","M001","M002","M003","M004","M005","M006","M007","M008","M009","M01","M010","M011","M012","M013","M014","M015","M016","M017","M018","M019","M020","M021","M022","M023","M024","M025","M026","M027","M028","M029","M030","M031","M032","M033","M034","M035","M036","M037","M05","M32"],
@@ -552,7 +551,6 @@
         }
     };
     
-    // Adicionar mais ruas simplificadas para demonstracao
     warehouseData["RUA 03"] = { cols: ["M001","M002","M003","M004","M005","M006"], rows: { "A01": ["65%","59%","65%","91%","98%","82%"], "A02": ["60%","79%","60%","84%","80%","67%"] } };
     warehouseData["RUA 04"] = { cols: ["M001","M002","M003","M004","M005"], rows: { "A01": ["62%","81%","56%","67%","70%"], "A02": ["62%","70%","62%","67%","84%"] } };
     
@@ -575,12 +573,10 @@
         return inactiveAddresses.has(getAddressKey(rua, linha, coluna));
     }
     
-    // Funcao para adicionar nova coluna em uma rua
     function addColumnToStreet(streetName) {
         const street = warehouseData[streetName];
         if (!street) return;
         
-        // Gerar novo nome de coluna Mxx
         let nextNum = 1;
         const existingNums = street.cols.map(col => {
             const match = col.match(/M(\d+)/);
@@ -591,20 +587,17 @@
         }
         const newColName = 'M' + nextNum.toString().padStart(3, '0');
         
-        // Adicionar coluna
         street.cols.push(newColName);
         
-        // Adicionar valor vazio para cada linha existente
         for (let rowId in street.rows) {
             street.rows[rowId].push('—');
         }
         
-        // Re-renderizar
         renderAllStreets();
         alert('Coluna ' + newColName + ' adicionada em ' + streetName);
     }
     
-    function showConfirmDialog(rua, linha, coluna, percentual, onConfirm) {
+    function showConfirmDialog(rua, linha, coluna, onConfirm) {
         const confirmHtml = `
             <div class="confirm-overlay" id="confirmOverlay">
                 <div class="confirm-modal">
@@ -653,11 +646,23 @@
             { pos: "E", percent: "67%", armazenado: "0CB / 6CX", livre: "9CB ou 3CX" }
         ];
         
-        const positionsHtml = modalPositions.map(pos => {
+        let positionsHtml = '';
+        for (let i = 0; i < modalPositions.length; i++) {
+            let pos = modalPositions[i];
             let num = parseFloat(pos.percent.replace('%', ''));
-            let colorClass = num >= 100 ? 'modal-text-red' : (num >= 60 ? 'modal-text-orange' : (num >= 40 ? 'modal-text-yellow' : 'modal-text-green'));
-            return '<tr><td class="pos-name">' + pos.pos + '</td><td class="' + colorClass + '">' + pos.percent + '</td><td>' + pos.armazenado + '</td><td>' + pos.livre + '</td></tr>';
-        }).join('');
+            let colorClass = '';
+            if (num >= 100) colorClass = 'modal-text-red';
+            else if (num >= 60) colorClass = 'modal-text-orange';
+            else if (num >= 40) colorClass = 'modal-text-yellow';
+            else colorClass = 'modal-text-green';
+            
+            positionsHtml += '<tr>';
+            positionsHtml += '<td class="pos-name">' + pos.pos + '</td>';
+            positionsHtml += '<td class="' + colorClass + '">' + pos.percent + '</td>';
+            positionsHtml += '<td>' + pos.armazenado + '</td>';
+            positionsHtml += '<td>' + pos.livre + '</td>';
+            positionsHtml += '</tr>';
+        }
         
         const inactiveBadge = isInactive ? '<span class="inactive-badge">INATIVO</span>' : '';
         const displayPercent = isInactive ? 'Inativo' : percentual;
@@ -683,15 +688,25 @@
                         </div>
                         <button class="close-button" id="closeModalBtn">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M18 6 6 18"></path><path d="m6 6 12 12"></path>
+                                <path d="M18 6 6 18"></path>
+                                <path d="m6 6 12 12"></path>
                             </svg>
                         </button>
                     </div>
                     <div class="content">
                         <table class="modal-table">
-                            <thead><tr><th>Posicao</th><th>Uso (%)</th><th>Armazenado</th><th>Livre</th></tr></thead>
-                            <tbody>${positionsHtml}</tbody>
-                        ｜｜DSML｜｜
+                            <thead>
+                                <tr>
+                                    <th>Posicao</th>
+                                    <th>Uso (%)</th>
+                                    <th>Armazenado</th>
+                                    <th>Livre</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${positionsHtml}
+                            </tbody>
+                        </table>
                     </div>
                     <div class="footer">
                         <button class="btn-danger" id="deactivateBtn">${isInactive ? 'Reativar Modulo' : 'Desativar Modulo'}</button>
@@ -700,6 +715,7 @@
                 </div>
             </div>
         `;
+        
         document.body.insertAdjacentHTML('beforeend', modalHtml);
         const modal = document.getElementById('dynamicModal');
         const closeModal = () => modal.remove();
@@ -718,7 +734,7 @@
                 alert('Endereco ' + ruaNome + '.' + linhaId + '.' + colunaNome + ' foi reativado com sucesso!');
                 renderAllStreets();
             } else {
-                showConfirmDialog(ruaNome, linhaId, colunaNome, percentual, function() {
+                showConfirmDialog(ruaNome, linhaId, colunaNome, function() {
                     const key = getAddressKey(ruaNome, linhaId, colunaNome);
                     inactiveAddresses.add(key);
                     alert('Endereco ' + ruaNome + '.' + linhaId + '.' + colunaNome + ' inativado com sucesso! Objetos foram direcionados para Area de Refugo.');
@@ -746,11 +762,14 @@
             
             let headerHtml = '<div class="street-title"><span>' + streetName + '</span><span style="font-size:12px; font-weight:normal;"> scroll horizontal → </span></div>';
             headerHtml += '<div class="grid-header"><div class="row-label"></div><div class="cols-grid">';
-            cols.forEach(col => { headerHtml += '<span>' + col + '</span>'; });
+            for (let i = 0; i < cols.length; i++) {
+                headerHtml += '<span>' + cols[i] + '</span>';
+            }
             headerHtml += '<div class="plus-blue add-col-btn" data-rua="' + streetName + '">+</div></div></div>';
             
             let rowsHtml = '';
-            for (let rowId of rowIds) {
+            for (let r = 0; r < rowIds.length; r++) {
+                let rowId = rowIds[r];
                 const cells = rowsData[rowId];
                 rowsHtml += '<div class="grid-row"><div class="row-id">' + rowId + '</div><div class="cells-grid">';
                 for (let i = 0; i < cols.length; i++) {
@@ -768,7 +787,6 @@
             container.appendChild(streetDiv);
         }
         
-        // Eventos para as celulas
         document.querySelectorAll('.cell[data-rua]').forEach(cell => {
             cell.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -781,7 +799,6 @@
             });
         });
         
-        // Eventos para botoes de adicionar coluna
         document.querySelectorAll('.add-col-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
