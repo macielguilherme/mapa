@@ -20,6 +20,7 @@
         }
 
         .container {
+            max-width: 1400px;
             margin: 0 auto;
         }
 
@@ -148,6 +149,7 @@
             font-size: 16px;
             text-align: center;
             flex-shrink: 0;
+            cursor: pointer;
         }
         .cols-grid, .cells-grid {
             display: flex;
@@ -181,6 +183,11 @@
             padding: 4px;
             transition: 0.1s;
             box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            cursor: pointer;
+        }
+        .cell:hover {
+            opacity: 0.85;
+            transform: scale(0.98);
         }
         /* Cores conforme o mapa */
         .bg-red { background-color: #dc2626; }      /* critico >=100% */
@@ -230,9 +237,137 @@
             height: 24px;
             border-radius: 6px;
         }
-        hr {
-            margin: 20px 0 0;
-            border-color: #e5e7eb;
+        
+        /* MODAL STYLES - Alta fidelidade com cores nos percentuais */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+        .modal-container {
+            width: 672px;
+            max-width: 90%;
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            animation: modalFadeIn 0.2s ease-out;
+        }
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .header {
+            padding: calc(0.25rem * 4);
+            border-bottom: 1px solid #e4e4e7;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .header-title-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+        .ocupacao-tag {
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-left: 0.5rem;
+            padding: 2px 8px;
+            border-radius: 20px;
+        }
+        /* Cores da tag de ocupação no header do modal */
+        .ocupacao-red { background-color: #dc2626; color: white; }
+        .ocupacao-orange { background-color: #f97316; color: white; }
+        .ocupacao-yellow { background-color: #fbbf24; color: #1e293b; }
+        .ocupacao-green { background-color: #10b981; color: white; }
+        
+        .audit-status {
+            background-color: #3f3f46;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .close-button {
+            color: #71717a;
+            cursor: pointer;
+            background: transparent;
+            border: none;
+            padding: 4px;
+            border-radius: 6px;
+        }
+        .close-button:hover {
+            background-color: #f1f5f9;
+        }
+        .content {
+            background-color: #f8fafc;
+            padding: calc(0.25rem * 4);
+        }
+        .modal-table {
+            width: 100%;
+            font-size: 0.875rem;
+            border-collapse: separate;
+            border-spacing: 0 0.25rem;
+            text-align: center;
+        }
+        .modal-table thead th {
+            color: #3f3f46;
+            font-weight: 600;
+            padding: 0.5rem 0.5rem;
+            border-bottom: 1px solid #e4e4e7;
+        }
+        .modal-table tbody tr {
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .modal-table td {
+            padding: 0.75rem 0.5rem;
+            color: #71717a;
+        }
+        .pos-name {
+            font-weight: 500;
+            color: #27272a;
+        }
+        /* Cores dos percentuais no modal - mesmo padrão da grade */
+        .modal-text-red { color: #dc2626; font-weight: 700; }
+        .modal-text-orange { color: #f97316; font-weight: 700; }
+        .modal-text-yellow { color: #b45309; font-weight: 700; }
+        .modal-text-green { color: #10b981; font-weight: 700; }
+        
+        .footer {
+            padding: calc(0.25rem * 4);
+            border-top: 1px solid #e4e4e7;
+            display: flex;
+            justify-content: flex-end;
+        }
+        .btn-blue {
+            background-color: #2563eb;
+            color: white;
+            font-weight: 600;
+            font-size: 0.875rem;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .btn-blue:hover {
+            background-color: #1d4ed8;
         }
         @media (max-width: 780px) {
             body { padding: 20px; }
@@ -249,7 +384,6 @@
         <h1>G1 - Guarda Ceilândia I/DF</h1>
     </header>
 
-    <!-- KPIs exatos do mapa.txt -->
     <div class="kpi-container">
         <div class="card">
             <span class="label">Caixas armazenadas</span>
@@ -291,9 +425,7 @@
         <button class="btn-primary" id="addStreetBtn">+ Adicionar Rua</button>
     </div>
 
-    <div id="streetsContainer">
-        <!-- As ruas serao inseridas via javascript com dados reais do mapa.txt -->
-    </div>
+    <div id="streetsContainer"></div>
 
     <div class="legend">
         <div class="legend-item"><div class="legend-color bg-red"></div> Critico (>=100%)</div>
@@ -307,8 +439,7 @@
 
 <script>
     // --------------------------------------------------------------
-    // Dados reais extraidos do mapa.txt (todas as ruas e posicoes)
-    // Estrutura fiel ao conteudo do arquivo fornecido
+    // Dados reais extraídos do mapa.txt
     // --------------------------------------------------------------
     const warehouseData = {
         "RUA 01": {
@@ -352,7 +483,28 @@
         "RUA 07": { cols: ["M001","M002","M003","M004","M005","M006","M007","M008","M009","M010","M011","M012","M013","M014","M015","M016","M017","M018","M019","M020","M021","M022","M023","M024"], rows: { "A01": ["92%","82%","88%","92%","90%","92%","92%","70%","66%","76%","93%","94%","88%","89%","56%","38%","63%","53%","58%","79%","80%","60%","94%","90%"] } }
     };
     
-    // Funcao para classificar cor
+    // Função para obter classe de cor baseada no percentual (mesmo padrão da grade)
+    function getPercentColorClass(percentStr) {
+        if (!percentStr || percentStr === '—') return 'modal-text-green';
+        let num = parseFloat(percentStr.replace('%', ''));
+        if (isNaN(num)) return 'modal-text-green';
+        if (num >= 100) return 'modal-text-red';
+        if (num >= 60) return 'modal-text-orange';
+        if (num >= 40) return 'modal-text-yellow';
+        return 'modal-text-green';
+    }
+    
+    // Função para obter classe de fundo da tag de ocupação
+    function getTagColorClass(percentStr) {
+        if (!percentStr || percentStr === '—') return 'ocupacao-green';
+        let num = parseFloat(percentStr.replace('%', ''));
+        if (isNaN(num)) return 'ocupacao-green';
+        if (num >= 100) return 'ocupacao-red';
+        if (num >= 60) return 'ocupacao-orange';
+        if (num >= 40) return 'ocupacao-yellow';
+        return 'ocupacao-green';
+    }
+    
     function getCellColor(percentStr) {
         if (!percentStr || percentStr === '—') return 'bg-empty';
         let num = parseFloat(percentStr.replace('%', ''));
@@ -361,6 +513,78 @@
         if (num >= 60) return 'bg-orange';
         if (num >= 40) return 'bg-yellow-orange';
         return 'bg-green';
+    }
+    
+    // Dados das posições para o modal (A, B, C, D, E com seus respectivos percentuais)
+    const modalPositions = [
+        { pos: "A", percent: "133%", armazenado: "0CB / 12CX", livre: "0CB ou 0CX" },
+        { pos: "B", percent: "133%", armazenado: "0CB / 12CX", livre: "0CB ou 0CX" },
+        { pos: "C", percent: "133%", armazenado: "0CB / 12CX", livre: "0CB ou 0CX" },
+        { pos: "D", percent: "56%", armazenado: "0CB / 5CX", livre: "12CB ou 4CX" },
+        { pos: "E", percent: "67%", armazenado: "0CB / 6CX", livre: "9CB ou 3CX" }
+    ];
+    
+    function openModal(ruaNome, linhaId, colunaNome, percentual) {
+        const tagColorClass = getTagColorClass(percentual);
+        const positionsHtml = modalPositions.map(pos => {
+            const colorClass = getPercentColorClass(pos.percent);
+            return `
+                <tr>
+                    <td class="pos-name">${pos.pos}</td>
+                    <td class="${colorClass}">${pos.percent}</td>
+                    <td>${pos.armazenado}</td>
+                    <td>${pos.livre}</td>
+                </tr>
+            `;
+        }).join('');
+        
+        const modalHtml = `
+            <div class="modal-overlay" id="dynamicModal">
+                <div class="modal-container">
+                    <div class="header">
+                        <div style="display: flex; align-items: center; flex: 1; justify-content: space-between; padding-right: 2.5rem;">
+                            <h3 class="header-title-wrapper">
+                                ${ruaNome}.${linhaId}.${colunaNome}
+                                <span class="ocupacao-tag ${tagColorClass}">Ocupação: ${percentual}</span>
+                            </h3>
+                            <span class="audit-status">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"></path>
+                                    <path d="M12 22V12"></path>
+                                    <polyline points="3.29 7 12 12 20.71 7"></polyline>
+                                </svg>
+                                Não Auditado
+                            </span>
+                        </div>
+                        <button class="close-button" id="closeModalBtn">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M18 6 6 18"></path><path d="m6 6 12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="content">
+                        <table class="modal-table">
+                            <thead>
+                                <tr><th>Posição</th><th>Uso (%)</th><th>Armazenado</th><th>Livre</th></tr>
+                            </thead>
+                            <tbody>
+                                ${positionsHtml}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="footer">
+                        <button class="btn-blue" id="selectAuditorBtn">Selecionar Usuário Auditor</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        const modal = document.getElementById('dynamicModal');
+        const closeBtn = document.getElementById('closeModalBtn');
+        const closeModal = () => modal.remove();
+        closeBtn?.addEventListener('click', closeModal);
+        modal.addEventListener('click', (e) => { if(e.target === modal) closeModal(); });
+        document.getElementById('selectAuditorBtn')?.addEventListener('click', () => alert(`Auditoria para ${ruaNome}.${linhaId}.${colunaNome} - funcionalidade em desenvolvimento`));
     }
     
     function renderAllStreets() {
@@ -374,19 +598,14 @@
                 let numB = parseInt(b.match(/\d+/) || [0]);
                 return numA - numB;
             });
-            
             const streetDiv = document.createElement('div');
             streetDiv.className = 'street-block';
             const contentDiv = document.createElement('div');
             contentDiv.className = 'street-content';
-            
-            // cabecalho
             let headerHtml = `<div class="street-title"><span>${streetName}</span><span style="font-size:12px; font-weight:normal;"> scroll horizontal → </span></div>`;
             headerHtml += `<div class="grid-header"><div class="row-label"></div><div class="cols-grid">`;
             cols.forEach(col => { headerHtml += `<span>${col}</span>`; });
             headerHtml += `<div class="plus-blue">+</div></div></div>`;
-            
-            // linhas
             let rowsHtml = '';
             for (let rowId of rowIds) {
                 const cells = rowsData[rowId];
@@ -394,21 +613,28 @@
                 for (let i = 0; i < cols.length; i++) {
                     let val = (cells && cells[i]) ? cells[i] : '—';
                     let colorClass = getCellColor(val);
-                    rowsHtml += `<div class="cell ${colorClass}">${val !== '—' ? val : '—'}</div>`;
+                    rowsHtml += `<div class="cell ${colorClass}" data-rua="${streetName}" data-linha="${rowId}" data-coluna="${cols[i]}" data-percent="${val}">${val !== '—' ? val : '—'}</div>`;
                 }
                 rowsHtml += `<div class="plus-blue">+</div></div></div>`;
             }
-            // linha extra para adicionar nova linha
             rowsHtml += `<div class="grid-row"><div class="row-id plus-blue" style="background:transparent;">+</div><div class="cells-grid">`;
             for(let i=0; i<cols.length; i++) rowsHtml += `<div class="cell bg-empty">-</div>`;
             rowsHtml += `<div class="plus-blue">+</div></div></div>`;
-            
             contentDiv.innerHTML = headerHtml + rowsHtml;
             streetDiv.appendChild(contentDiv);
             container.appendChild(streetDiv);
         }
-        
-        // eventos para simular adicionar (apenas demo)
+        // Adicionar eventos de clique nas células
+        document.querySelectorAll('.cell[data-rua]').forEach(cell => {
+            cell.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const rua = cell.getAttribute('data-rua');
+                const linha = cell.getAttribute('data-linha');
+                const coluna = cell.getAttribute('data-coluna');
+                const percent = cell.getAttribute('data-percent');
+                openModal(rua, linha, coluna, percent);
+            });
+        });
         document.querySelectorAll('.plus-blue').forEach(el => {
             el.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -417,10 +643,7 @@
         });
     }
     
-    document.getElementById('addStreetBtn').addEventListener('click', () => {
-        alert('Adicionar nova rua - integracao futura');
-    });
-    
+    document.getElementById('addStreetBtn').addEventListener('click', () => alert('Adicionar nova rua - integracao futura'));
     renderAllStreets();
 </script>
 </body>
